@@ -1,0 +1,35 @@
+{
+  "name": "@hosaka-fm/crate-cli",
+  "version": "0.1.0",
+  "description": "crate — the command-line door to the crate music-data API (agents-first, clig.dev-aligned)",
+  "license": "MIT",
+  "repository": "github:hosaka-fm/crate-cli",
+  "type": "module",
+  "bin": {
+    "crate": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node -e \"require('fs').chmodSync('dist/index.js', 0o755)\"",
+    "typecheck": "tsc --noEmit",
+    "pretest": "npm run build",
+    "test": "vitest run",
+    "gen:types": "openapi-typescript https://crate.hosaka.fm/api/v2/openapi.json -o src/generated/crate-api.ts",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "openapi-typescript": "^7.4.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0"
+  }
+}
