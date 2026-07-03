@@ -441,6 +441,8 @@ export interface components {
             critic_count: number | null;
             formats: string[];
             link_to_cube: string;
+            /** @description The row artist's canonical 64-hex cluster_id (the fleet identity spine) — null for multi-artist credits or when no identity bind is held. Feed it straight to /api/v2/artist/{key}. */
+            artist_cluster_id?: string | null;
         };
         SearchResponse: {
             query: {
@@ -1224,6 +1226,22 @@ export interface components {
             resolved_from: "url" | "name" | "locator";
             matched_on?: string;
             note?: string;
+            /** @description Onward pointers — present whenever an identity resolved (cluster-addressed when a cluster_id bound; slug-addressed when the identity matched without a verified cluster bind). Follow `artist` for the full dossier. */
+            _links?: {
+                /** @description GET this for the full artist dossier (accepts 64-hex cluster_id or slug). */
+                artist?: string;
+                artist_dossier_by_slug?: string;
+            };
+            /** @description Disambiguation aid, emitted ONLY when a ?q= resolve ends clusterless (unresolved, or identity matched without a cluster bind): up to 5 OBSERVED-tier prefix matches from the booking graph. tier:'cluster' = unverified — surface as flagged, never as canonical truth. Absent otherwise. */
+            candidates?: {
+                /** @description The candidate 64-hex cluster_id (observed tier). */
+                cluster_id?: string;
+                name?: string;
+                /** @enum {string} */
+                tier?: "cluster";
+                /** @description Booking-graph support (k-anon floor 2) — a rough strength signal. */
+                distinct_events?: number;
+            }[];
         };
         TastemakersResponse: {
             leaderboard: {

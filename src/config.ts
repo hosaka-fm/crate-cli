@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import { CliError, EXIT } from './errors.js';
 
 export const DEFAULT_BASE_URL = 'https://crate.hosaka.fm';
-export const API_VERSION_PIN = '2.1.0';
+export const API_VERSION_PIN = '2.2.0';
 export const KEY_HOWTO = [
   'set it for this shell:      export CRATE_API_KEY=ck_live_…',
   'or store it:                crate auth set   (reads the key from stdin — safe for shell history)',
