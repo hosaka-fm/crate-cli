@@ -234,10 +234,8 @@ program
     run(async (path: string) => {
       let p = path.startsWith('/') ? path : `/${path}`;
       if (!p.startsWith('/api/')) p = `/api/v2${p}`;
-      const [pathname, query] = p.split('?', 2);
-      const params: Record<string, string> = {};
-      if (query !== undefined) for (const [k, v] of new URLSearchParams(query)) params[k] = v;
-      emit(await apiGet(pathname!, params, httpOpts()), outOpts());
+      // the query string rides verbatim (multi-valued params preserved byte-exact)
+      emit(await apiGet(p, {}, httpOpts()), outOpts());
     })
   );
 
@@ -317,15 +315,16 @@ auth
 program
   .command('capabilities')
   .description('the machine contract: versions, commands, exit codes, env vars, output rules')
-  .action(run(async () => emit(CAPABILITIES, { ...outOpts(), json: true })));
+  .action(run(async () => emit(CAPABILITIES, outOpts())));
 
 program
   .command('robot-docs')
-  .description('the paste-ready agent handbook (markdown on stdout)')
-  .argument('[topic]', "only 'guide' exists (the default)")
+  .description('the paste-ready agent handbook (markdown on stdout; --json wraps it as {guide})')
   .action(
     run(async () => {
-      process.stdout.write(ROBOT_DOCS);
+      // the markdown IS the data; --json force-wraps it so the output contract holds everywhere
+      if (outOpts().json === true) emit({ guide: ROBOT_DOCS }, { json: true });
+      else process.stdout.write(ROBOT_DOCS);
     })
   );
 
@@ -350,6 +349,11 @@ program
       );
     })
   );
+
+// Discovery footer (agents) on every subcommand's --help — the contract is one hop away.
+for (const c of program.commands) {
+  c.addHelpText('after', '\nagents: `crate capabilities` is the machine contract (envelope + exit codes) · `crate robot-docs` is the handbook');
+}
 
 // ── no-args → concise help (clig.dev), unknown → suggestion ────────────────
 

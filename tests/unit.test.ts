@@ -39,6 +39,17 @@ describe('exit-code dictionary', () => {
   it('never uses exit 1 for empty results (ok covers honest-gap by contract)', () => {
     expect(EXIT_DICTIONARY.ok!.meaning).toContain('honest-gap');
   });
+  it('pins the full code→meaning map (DESIGN.md dictionary)', () => {
+    expect(EXIT_DICTIONARY.ok!.code).toBe(0);
+    expect(EXIT_DICTIONARY.usage!.code).toBe(1);
+    expect(EXIT_DICTIONARY.auth!.code).toBe(2);
+    expect(EXIT_DICTIONARY.invalid_input!.code).toBe(3);
+    expect(EXIT_DICTIONARY.rate_limited!.code).toBe(4);
+    expect(EXIT_DICTIONARY.server!.code).toBe(5);
+    expect(EXIT_DICTIONARY.network!.code).toBe(6);
+    expect(EXIT_DICTIONARY.config!.code).toBe(7);
+    expect(Object.keys(EXIT_DICTIONARY).length).toBe(8);
+  });
 });
 
 describe('output mode', () => {
@@ -89,12 +100,14 @@ describe('config + key resolution (precedence: flag > env > config file)', () =>
     } catch (err) {
       expect(err).toBeInstanceOf(CliError);
       expect((err as CliError).code).toBe(EXIT.CONFIG);
-      expect((err as CliError).hints.join(' ')).toContain('rm ');
+      expect((err as CliError).hints.join(' ')).toContain('delete the file');
     }
   });
-  it('maskKey never reveals the middle; base url strips trailing slash', () => {
+  it('maskKey never reveals the middle (incl. the 12-char boundary); base url strips trailing slash', () => {
     expect(maskKey('ck_live_abcdefghijklmnop')).toBe('ck_live_…mnop');
     expect(maskKey('ck_live_abcdefghijklmnop')).not.toContain('ijkl');
+    expect(maskKey('shortkey1234')).toBe('shor…'); // ≤12 chars: prefix only, no suffix leak
+    expect(maskKey('exactly13char')).toBe('exactly1…char');
     process.env.CRATE_BASE_URL = 'https://example.test///';
     expect(resolveBaseUrl(undefined)).toBe('https://example.test');
   });
@@ -118,7 +131,7 @@ describe('http error mapping (mocked fetch)', () => {
   it('401 → AUTH, teaches all three key paths + replica-lag note', async () => {
     process.env.CRATE_API_KEY = 'ck_bad';
     stubFetch(401, { error: 'invalid_api_key', message: 'unknown key' });
-    const err = await apiGet('/api/v2/aura', {}, {}).catch((e: CliError) => e);
+    const err = (await apiGet('/api/v2/aura', {}, {}).catch((e: unknown) => e)) as CliError;
     expect(err.code).toBe(EXIT.AUTH);
     const hints = err.hints.join('\n');
     expect(hints).toContain('CRATE_API_KEY');
@@ -129,7 +142,7 @@ describe('http error mapping (mocked fetch)', () => {
   it('400 → INVALID_INPUT, passes the API hint + param through verbatim', async () => {
     process.env.CRATE_API_KEY = 'ck_ok';
     stubFetch(400, { error: 'invalid_locator', message: 'not a cluster', param: 'cluster', hint: 'GET /api/v2/resolve?q=…' });
-    const err = await apiGet('/api/v2/aura/zzz', {}, {}).catch((e: CliError) => e);
+    const err = (await apiGet('/api/v2/aura/zzz', {}, {}).catch((e: unknown) => e)) as CliError;
     expect(err.code).toBe(EXIT.INVALID_INPUT);
     expect(err.message).toContain('param: cluster');
     expect(err.hints.join(' ')).toContain('/api/v2/resolve');
@@ -138,7 +151,7 @@ describe('http error mapping (mocked fetch)', () => {
   it('429 → RATE_LIMITED with Retry-After + X-RateLimit-* surfaced, no retry', async () => {
     process.env.CRATE_API_KEY = 'ck_ok';
     stubFetch(429, { error: 'rate_limited' }, { 'Retry-After': '30', 'X-RateLimit-Remaining': '0' });
-    const err = await apiGet('/api/v2/search', { q: 'x' }, {}).catch((e: CliError) => e);
+    const err = (await apiGet('/api/v2/search', { q: 'x' }, {}).catch((e: unknown) => e)) as CliError;
     expect(err.code).toBe(EXIT.RATE_LIMITED);
     const hints = err.hints.join('\n');
     expect(hints).toContain('Retry-After: 30');
@@ -151,7 +164,7 @@ describe('http error mapping (mocked fetch)', () => {
     stubFetch(503, { error: 'upstream' });
     await expect(apiGet('/api/v2/aura', {}, {})).rejects.toMatchObject({ code: EXIT.SERVER });
     vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new Error('ENOTFOUND'))));
-    const err = await apiGet('/api/v2/aura', {}, {}).catch((e: CliError) => e);
+    const err = (await apiGet('/api/v2/aura', {}, {}).catch((e: unknown) => e)) as CliError;
     expect(err.code).toBe(EXIT.NETWORK);
     expect(err.hints.join(' ')).toContain('CRATE_BASE_URL');
   });

@@ -56,10 +56,16 @@ describe('capabilities (the machine contract)', () => {
       ['api', 'cli_version', 'commands', 'config_file', 'contract_version', 'env', 'exit_codes', 'name', 'output', 'semantics'].sort()
     );
     expect(c.api.auth_header).toBe('X-API-Key');
+    // FULL exit-code pin: all 8 codes present, spot meanings on each
+    expect(Object.keys(c.exit_codes).map(Number).sort((a, b) => a - b)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
     expect(c.exit_codes['0']).toContain('honest-gap');
+    expect(c.exit_codes['2']).toContain('auth');
+    expect(c.exit_codes['3']).toContain('invalid');
     expect(c.exit_codes['4']).toContain('rate');
-    expect(Object.keys(c.commands)).toContain('resolve');
-    expect(Object.keys(c.commands)).toContain('triage');
+    // FULL command-surface pin: renaming/removing any command is a contract break
+    expect(Object.keys(c.commands).sort()).toEqual(
+      ['api', 'artist', 'aura', 'auth', 'breakouts', 'capabilities', 'docs', 'facets', 'festival', 'label', 'manifest', 'resolve', 'robot-docs', 'search', 'tastemakers', 'triage'].sort()
+    );
   });
   it('is byte-deterministic across runs', () => {
     expect(crate(['capabilities']).stdout).toBe(crate(['capabilities']).stdout);
@@ -152,6 +158,39 @@ describe('output discipline (Axioms 4, 12, 13)', () => {
       expect(r.stderr.length, args.join(' ')).toBeGreaterThan(0);
       expect(r.stdout, args.join(' ')).toBe('');
     }
+  });
+});
+
+describe('output force-flags at the process level', () => {
+  it('robot-docs --json wraps the markdown as {guide}; bare robot-docs is markdown', () => {
+    const j = crate(['robot-docs', '--json']);
+    expect(j.status).toBe(0);
+    expect(JSON.parse(j.stdout)).toHaveProperty('guide');
+    const m = crate(['robot-docs']);
+    expect(m.stdout.startsWith('# crate CLI')).toBe(true);
+  });
+  it('capabilities --human renders panels (not JSON); piped default stays JSON', () => {
+    const h = crate(['capabilities', '--human']);
+    expect(h.status).toBe(0);
+    expect(h.stdout.trimStart().startsWith('{')).toBe(false);
+    expect(h.stdout).toContain('cli_version');
+    const j = crate(['capabilities']);
+    expect(() => JSON.parse(j.stdout)).not.toThrow();
+  });
+});
+
+describe('api escape hatch — path normalization (hermetic: accepted paths reach the network → exit 6)', () => {
+  it.each([['aura?limit=3'], ['/aura'], ['/api/v2/aura'], ['/api/v2/aura?tier=a&tier=b']])('%s → normalized + attempted', (path) => {
+    const r = crate(['api', path], { CRATE_API_KEY: 'ck_x' });
+    expect(r.status).toBe(6); // reached the (dead) network — the path was accepted verbatim
+    expect(r.stdout).toBe('');
+  });
+});
+
+describe('aura hex acceptance', () => {
+  it('UPPERCASE 64-hex is accepted (lowercased) — reaches the network, not exit 3', () => {
+    const r = crate(['aura', 'A'.repeat(64)], { CRATE_API_KEY: 'ck_x' });
+    expect(r.status).toBe(6);
   });
 });
 

@@ -27,6 +27,8 @@ interface ApiErrorBody {
 
 export async function apiGet(path: string, params: Record<string, string | number | undefined>, opts: HttpOpts): Promise<unknown> {
   const base = resolveBaseUrl(opts.baseUrl);
+  // A path may carry its own query string verbatim (the `crate api` escape hatch) — the URL
+  // constructor preserves it byte-exact, including multi-valued params. `params` adds on top.
   const url = new URL(base + path);
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== '') url.searchParams.set(k, String(v));
@@ -61,7 +63,7 @@ export async function apiGet(path: string, params: Record<string, string | numbe
   const apiMsg = body.message ?? body.error ?? `HTTP ${res.status}`;
   const apiHints = body.hint !== undefined ? [body.hint] : [];
 
-  if (res.status === 401 || res.status === 402) {
+  if (res.status === 401 || res.status === 402 || res.status === 403) {
     throw new CliError(`the API rejected the key (${apiMsg})`, EXIT.AUTH, [
       ...apiHints,
       'check what the CLI is sending: crate auth status',

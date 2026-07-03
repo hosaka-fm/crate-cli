@@ -37,7 +37,7 @@ export function readConfig(): CrateConfig {
     return JSON.parse(readFileSync(p, 'utf8')) as CrateConfig;
   } catch {
     throw new CliError(`config file at ${p} is not valid JSON`, EXIT.CONFIG, [
-      `fix or remove it: rm ${p}  (then re-run: crate auth set)`,
+      `fix it by hand, or delete the file at ${p} and re-run: crate auth set`,
     ]);
   }
 }
