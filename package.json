@@ -1,7 +1,7 @@
 {
   "name": "@hosaka-fm/crate-cli",
-  "version": "0.1.0",
-  "description": "crate — the command-line door to the crate music-data API (agents-first, clig.dev-aligned)",
+  "version": "0.2.0",
+  "description": "crate \u2014 the command-line door to the crate music-data API (agents-first, clig.dev-aligned)",
   "license": "MIT",
   "repository": "github:hosaka-fm/crate-cli",
   "type": "module",
@@ -21,8 +21,9 @@
     "typecheck": "tsc --noEmit",
     "pretest": "npm run build",
     "test": "vitest run",
-    "gen:types": "openapi-typescript https://crate.hosaka.fm/api/v2/openapi.json -o src/generated/crate-api.ts",
-    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+    "gen:types": "openapi-typescript contracts/spec.json -o src/generated/crate-api.ts",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build",
+    "gen:spec": "curl -fsS https://crate.hosaka.fm/api/v2/openapi.json | jq . > contracts/spec.json"
   },
   "dependencies": {
     "commander": "^12.1.0"

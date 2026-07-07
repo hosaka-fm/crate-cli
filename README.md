@@ -13,6 +13,7 @@ crate resolve "Four Tet"                # name/link/id → the canonical cluster
 crate artist <cluster_id>               # everything crate knows about one artist, one call
 crate aura --limit 10                   # multi-dimension convergence signals, strongest first
 crate search "detroit techno" --genre Electronic
+crate preview "Four Tet"                # no key yet? the KEYLESS education teaser
 ```
 
 ## For agents
@@ -36,9 +37,13 @@ crate triage            # ONE call: auth state + live API health + copy-paste ne
 |---|---|
 | `resolve <name\|url>` | any identifier → canonical `cluster_id` + locators (the front door) |
 | `artist <key>` | full dossier by 64-hex cluster_id or slug; `--fields` trims |
+| `master <key> <id>` | a master (release-group) dossier addressed under its artist |
+| `bandcamp <key> <item>` | a Bandcamp release addressed under its artist |
+| `preview <name>` | **keyless** education teaser — a capped slice of the artist dossier |
 | `label <key>` · `festival <slug>` | the other dossier grains |
 | `search <q>` | faceted catalogue search (`--genre --style --country --year-from … --nl`) |
 | `facets` | valid facet names + values |
+| `artists` | browse the artist grain (`--genre --style --tier --sort --limit --offset`) |
 | `aura [cluster]` | convergence signals (list, strongest first) or one artist |
 | `breakouts` | emerging artists (`--tier`, `--corroboration`) |
 | `tastemakers` | leaderboard; `--ones-to-watch` for the rising slice |
@@ -50,14 +55,22 @@ crate triage            # ONE call: auth state + live API health + copy-paste ne
 
 Get a key at [crate.hosaka.fm](https://crate.hosaka.fm); docs at
 [crate-sdk.hosaka.fm](https://crate-sdk.hosaka.fm). The CLI is built against API spec
-`2.1.0` (`GET /api/v2/openapi.json` — `info.version` pins the surface).
+`2.8.0`, vendored at `contracts/spec.json` (`tests/parity.test.ts` pins this README to the
+real pin — it cannot silently drift again).
 
 ## Development
 
 ```sh
-npm install && npm test        # builds, then runs unit + process-level contract tests
-npm run gen:types              # regenerate src/generated/ from the live spec
+npm install && npm test        # builds, then runs unit + contract + parity tests
+npm run gen:spec               # re-vendor contracts/spec.json from the live API
+npm run gen:types              # regenerate src/generated/ from the VENDORED spec (offline)
 ```
+
+**Drift guard**: every operation in `contracts/spec.json` must map to a CLI command in
+`src/coverage.ts` (or carry an explicit waiver with a reason). A daily scheduled workflow
+(`.github/workflows/drift.yml`) compares the live spec against the vendored one and goes red
+when the API moves; `tests/parity.test.ts` then walks you through the reconciliation
+(coverage, docs mention-parity, version pin, generated-types freshness).
 
 Design charter: [DESIGN.md](./DESIGN.md) — the output contract, exit-code dictionary, and the
 agent-ergonomics axioms this tool is built to.

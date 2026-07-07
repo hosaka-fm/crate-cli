@@ -64,7 +64,10 @@ describe('capabilities (the machine contract)', () => {
     expect(c.exit_codes['4']).toContain('rate');
     // FULL command-surface pin: renaming/removing any command is a contract break
     expect(Object.keys(c.commands).sort()).toEqual(
-      ['api', 'artist', 'aura', 'auth', 'breakouts', 'capabilities', 'docs', 'facets', 'festival', 'label', 'manifest', 'resolve', 'robot-docs', 'search', 'tastemakers', 'triage'].sort()
+      [
+        'api', 'artist', 'artists', 'aura', 'auth', 'bandcamp', 'breakouts', 'capabilities', 'docs', 'facets',
+        'festival', 'label', 'manifest', 'master', 'preview', 'resolve', 'robot-docs', 'search', 'tastemakers', 'triage',
+      ].sort()
     );
   });
   it('is byte-deterministic across runs', () => {
@@ -184,6 +187,39 @@ describe('api escape hatch — path normalization (hermetic: accepted paths reac
     const r = crate(['api', path], { CRATE_API_KEY: 'ck_x' });
     expect(r.status).toBe(6); // reached the (dead) network — the path was accepted verbatim
     expect(r.stdout).toBe('');
+  });
+});
+
+describe('parity commands (API 2.8.0 catch-up) — hermetic dead-port contract', () => {
+  it('artists with filters → attempts the network with a key (exit 6), stdout empty', () => {
+    const r = crate(['artists', '--genre', 'Electronic', '--tier', 'breakout', '--limit', '5'], { CRATE_API_KEY: 'ck_x' });
+    expect(r.status).toBe(6);
+    expect(r.stdout).toBe('');
+  });
+  it('artists keyless → exit 2 (a keyed endpoint)', () => {
+    expect(crate(['artists']).status).toBe(2);
+  });
+  it('master <key> <id> → attempts the network (exit 6)', () => {
+    const r = crate(['master', 'four-tet', '12345'], { CRATE_API_KEY: 'ck_x' });
+    expect(r.status).toBe(6);
+    expect(r.stdout).toBe('');
+  });
+  it('master without the id → exit 1 usage, stdout empty', () => {
+    const r = crate(['master', 'four-tet'], { CRATE_API_KEY: 'ck_x' });
+    expect(r.status).toBe(1);
+    expect(r.stdout).toBe('');
+  });
+  it('bandcamp <key> <item> → attempts the network (exit 6)', () => {
+    const r = crate(['bandcamp', 'a'.repeat(64), '123456'], { CRATE_API_KEY: 'ck_x' });
+    expect(r.status).toBe(6);
+  });
+  it('preview is KEYLESS: with NO key configured it attempts the network (exit 6, never exit 2)', () => {
+    const r = crate(['preview', 'Four', 'Tet']);
+    expect(r.status).toBe(6);
+    expect(r.stdout).toBe('');
+  });
+  it('preview without args → exit 1 usage', () => {
+    expect(crate(['preview']).status).toBe(1);
   });
 });
 

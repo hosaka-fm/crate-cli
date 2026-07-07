@@ -17,11 +17,12 @@ ALWAYS start at resolve.
     crate artist <cluster_id|slug>           # everything crate knows, one call
     crate search "detroit techno" --genre Electronic --limit 10
 
-## Auth (required for every data command)
+## Auth (required for every data command except preview)
 
     export CRATE_API_KEY=ck_live_…           # or: crate auth set   (reads key from stdin)
     crate auth status                        # masked key + source + live check
-Keyless → exit 2 with the fix. Fresh keys can 401 for a few seconds (replica lag) — retry once.
+Keyless → exit 2 with the fix (exception: \`crate preview\` needs no key — it is the education
+teaser). Fresh keys can 401 for a few seconds (replica lag) — retry once.
 
 ## Output contract (rely on it)
 
@@ -40,10 +41,15 @@ Keyless → exit 2 with the fix. Fresh keys can 401 for a few seconds (replica l
 
     crate resolve <query|url>  [--discogs N] [--mbid U] [--cluster HEX]
     crate artist <key> [--fields identity,discography]     # key = 64-hex cluster_id or slug
+    crate master <key> <master_id>                         # a master dossier under its artist
+    crate bandcamp <key> <item_id>                         # a Bandcamp release under its artist
+    crate preview <name>                                   # KEYLESS teaser (capped artist slice)
     crate label <key>          crate festival <slug>
     crate search <q> [--genre G --style S --country C --label L --format F
                       --year-from Y --year-to Y --limit N --offset N --nl]
     crate facets [--genre G --style S --country C --year-from Y --year-to Y]
+    crate artists [--genre G --style S --tier breakout|rising|steady
+                   --sort discovery|reach --limit N --offset N]   # browse the artist grain
     crate aura [cluster_hex] [--limit N]                   # list (strongest first) or one artist
     crate breakouts [--tier breakout|rising] [--corroboration corroborated|booking_ahead]
     crate tastemakers [--ones-to-watch] [--limit N]
@@ -54,8 +60,15 @@ Keyless → exit 2 with the fix. Fresh keys can 401 for a few seconds (replica l
 
 ## Recipes
 
+    # no key yet? taste the data keyless, then get a key for the full dossier
+    crate preview "Four Tet"
+
     # name → dossier, one pipeline
     crate resolve "Objekt" --json | jq -r .cluster_id | xargs crate artist
+
+    # browse a genre, then drill into one artist's masters
+    crate artists --genre Electronic --tier breakout --limit 10
+    crate artist <key> --fields discography | jq  # master ids → crate master <key> <id>
 
     # strongest auras with measured break odds
     crate aura --limit 20 | jq '.items[] | {artist_name, convergence_dim_count, break_odds}'

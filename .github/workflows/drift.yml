@@ -1,0 +1,40 @@
+# drift.yml — the scheduled API↔CLI drift tripwire. Red = the live crate API moved (new
+# version or a changed operation set) and this repo has not reconciled. The fix path:
+#   npm run gen:spec && npm run gen:types
+#   reconcile src/coverage.ts (every new operation needs a command or a waiver with a reason)
+#   npm test   (tests/parity.test.ts walks you through the rest: docs, pin, types)
+name: api-drift
+on:
+  schedule:
+    - cron: '17 5 * * *' # daily 05:17 UTC
+  workflow_dispatch:
+
+jobs:
+  drift:
+    name: live spec vs vendored contracts/spec.json
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: compare live spec against the vendored pin
+        run: |
+          set -euo pipefail
+          curl -fsS https://crate.hosaka.fm/api/v2/openapi.json -o /tmp/live-spec.json
+          live_version=$(jq -r .info.version /tmp/live-spec.json)
+          pinned_version=$(jq -r .info.version contracts/spec.json)
+          ops() { jq -S '[.paths | to_entries[] | .key as $p | (.value | keys[]) as $m | "\($m | ascii_upcase) \($p)"] | sort' "$1"; }
+          ops /tmp/live-spec.json > /tmp/live-ops.json
+          ops contracts/spec.json > /tmp/pinned-ops.json
+          drift=0
+          if [ "$live_version" != "$pinned_version" ]; then
+            echo "::error::crate API moved to ${live_version} (vendored: ${pinned_version})."
+            drift=1
+          fi
+          if ! diff -u /tmp/pinned-ops.json /tmp/live-ops.json; then
+            echo "::error::operation set drifted (diff above: - vendored, + live)."
+            drift=1
+          fi
+          if [ "$drift" -ne 0 ]; then
+            echo "Fix: npm run gen:spec && npm run gen:types, then reconcile src/coverage.ts (new operations need a command or a WAIVER with a reason) and run npm test — tests/parity.test.ts enforces the rest (docs mention-parity, version pin, generated-types freshness)."
+            exit 1
+          fi
+          echo "no drift: live ${live_version} == vendored ${pinned_version}; operation sets identical."

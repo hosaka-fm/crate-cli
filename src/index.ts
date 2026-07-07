@@ -103,6 +103,28 @@ program
   );
 
 program
+  .command('master')
+  .description('a master (release-group) dossier addressed under its artist')
+  .argument('<key>', 'the artist — 64-hex cluster_id or slug')
+  .argument('<id>', 'the discogs_master_id (list them: crate artist <key> --fields discography)')
+  .action(
+    run(async (key: string, id: string) => {
+      emit(await apiGet(`/api/v2/artist/${encodeURIComponent(key)}/master/${encodeURIComponent(id)}`, {}, httpOpts()), outOpts());
+    })
+  );
+
+program
+  .command('bandcamp')
+  .description('a Bandcamp release addressed under its artist (tracklist + artwork + economics)')
+  .argument('<key>', 'the artist — 64-hex cluster_id or slug')
+  .argument('<item>', 'the numeric bandcamp_item_id (list them: crate artist <key> --fields bandcamp_releases)')
+  .action(
+    run(async (key: string, item: string) => {
+      emit(await apiGet(`/api/v2/artist/${encodeURIComponent(key)}/bandcamp/${encodeURIComponent(item)}`, {}, httpOpts()), outOpts());
+    })
+  );
+
+program
   .command('label')
   .description('the full label dossier — key is a 64-hex label cluster_id or a slug')
   .argument('<key>')
@@ -113,6 +135,16 @@ program
   .description('the festival dossier — history, editions, who played when')
   .argument('<slug>', 'the canonical festival key (e.g. dekmantel)')
   .action(run(async (slug: string) => emit(await apiGet(`/api/v2/dossier/festival/${encodeURIComponent(slug)}`, {}, httpOpts()), outOpts())));
+
+program
+  .command('preview')
+  .description('KEYLESS education teaser — a capped slice of the artist dossier (the real thing: crate artist)')
+  .argument('<query...>', 'artist name, slug, or 64-hex cluster_id')
+  .action(
+    run(async (queryParts: string[]) => {
+      emit(await apiGet('/api/v2/preview/artist', { q: queryParts.join(' ').trim() }, { ...httpOpts(), requireKey: false }), outOpts());
+    })
+  );
 
 // ── discovery ───────────────────────────────────────────────────────────────
 
@@ -169,6 +201,24 @@ program
     run(async (o: { genre?: string; style?: string; country?: string; yearFrom?: string; yearTo?: string }) => {
       emit(
         await apiGet('/api/v2/facets', { genre: o.genre, style: o.style, country: o.country, year_from: o.yearFrom, year_to: o.yearTo }, httpOpts()),
+        outOpts()
+      );
+    })
+  );
+
+program
+  .command('artists')
+  .description('browse the artist grain — genre/style/tier filters, discovery-ranked')
+  .option('--genre <g>', 'exact primary genre (vocabulary: crate facets)')
+  .option('--style <s>', 'exact style')
+  .option('--tier <t>', 'breakout | rising | steady')
+  .option('--sort <s>', 'discovery (default) | reach')
+  .option('--limit <n>', '1..100 (default 24)')
+  .option('--offset <n>', 'pagination; offset+limit ≤ 500 (the server window)')
+  .action(
+    run(async (o: { genre?: string; style?: string; tier?: string; sort?: string; limit?: string; offset?: string }) => {
+      emit(
+        await apiGet('/api/v2/artists', { genre: o.genre, style: o.style, tier: o.tier, sort: o.sort, limit: o.limit, offset: o.offset }, httpOpts()),
         outOpts()
       );
     })
