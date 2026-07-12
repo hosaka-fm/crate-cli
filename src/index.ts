@@ -274,6 +274,41 @@ program
   .description('the dossier data dictionary — every field crate can expose, with provenance')
   .action(run(async () => emit(await apiGet('/api/v2/dossier/manifest', {}, httpOpts()), outOpts())));
 
+program
+  .command('surface')
+  .description('generic cluster-keyed producer surfaces — registry index (no args) or one surface\'s rows')
+  .argument('[name]', 'schema-qualified registry key, e.g. seen.radio_play_v1 (list them: crate surface)')
+  .option('--cluster <hex>', '64-hex identity key in that surface\'s registered keyspace (required with <name>)')
+  .option('--after <cursor>', 'opaque keyset cursor from a previous page\'s next_after — pass back verbatim')
+  .option('--limit <n>', 'rows per page, clamped to the surface\'s registered cap')
+  .action(
+    run(async (name: string | undefined, o: { cluster?: string; after?: string; limit?: string }) => {
+      if (name === undefined) {
+        emit(await apiGet('/api/v2/surface', {}, httpOpts()), outOpts());
+        return;
+      }
+      if (o.cluster === undefined) {
+        throw new CliError(`crate surface ${name} needs --cluster (the 64-hex identity key in its registered keyspace)`, EXIT.USAGE, [
+          'list surfaces + keyspaces: crate surface',
+          `example: crate surface ${name} --cluster <64-hex>`,
+        ]);
+      }
+      if (!HEX64.test(o.cluster)) {
+        throw new CliError(`'${o.cluster}' is not a 64-hex cluster key`, EXIT.INVALID_INPUT, [
+          `have a name or link? resolve it first: crate resolve "${o.cluster}"`,
+        ]);
+      }
+      emit(
+        await apiGet(
+          `/api/v2/surface/${encodeURIComponent(name)}`,
+          { cluster: o.cluster.toLowerCase(), after: o.after, limit: o.limit },
+          httpOpts()
+        ),
+        outOpts()
+      );
+    })
+  );
+
 // ── escape hatch ────────────────────────────────────────────────────────────
 
 program

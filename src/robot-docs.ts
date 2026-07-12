@@ -54,6 +54,7 @@ teaser). Fresh keys can 401 for a few seconds (replica lag) — retry once.
     crate breakouts [--tier breakout|rising] [--corroboration corroborated|booking_ahead]
     crate tastemakers [--ones-to-watch] [--limit N]
     crate manifest                                         # the data dictionary
+    crate surface [name] [--cluster HEX --after CURSOR --limit N]  # producer-surface registry or rows
     crate api /api/v2/<path>?query…                        # raw authenticated GET (escape hatch)
     crate capabilities                                     # machine contract (JSON)
     crate triage                                           # auth + health + next commands, ONE call

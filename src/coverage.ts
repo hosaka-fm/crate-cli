@@ -34,6 +34,8 @@ export const COVERAGE: CoverageEntry[] = [
   { method: 'GET', path: '/api/v2/artist/{key}/master/{id}', command: 'master' },
   { method: 'GET', path: '/api/v2/artist/{key}/bandcamp/{item}', command: 'bandcamp' },
   { method: 'GET', path: '/api/v2/preview/artist', command: 'preview' },
+  { method: 'GET', path: '/api/v2/surface', command: 'surface' },
+  { method: 'GET', path: '/api/v2/surface/{name}', command: 'surface' },
 ];
 
 /** Operations intentionally not wrapped by a dedicated command, with reasons. */
