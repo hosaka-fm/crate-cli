@@ -1,7 +1,7 @@
 {
   "name": "@hosaka-fm/crate-cli",
-  "version": "0.3.0",
-  "description": "crate \u2014 the command-line door to the crate music-data API (agents-first, clig.dev-aligned)",
+  "version": "0.3.1",
+  "description": "crate — the command-line door to the crate music-data API (agents-first, clig.dev-aligned)",
   "license": "MIT",
   "repository": "github:hosaka-fm/crate-cli",
   "type": "module",
