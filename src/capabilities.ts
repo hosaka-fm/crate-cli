@@ -28,6 +28,7 @@ const API_COMMAND_DESCRIPTIONS: Record<string, string> = {
   breakouts: 'emerging artists (booking momentum × press)',
   tastemakers: 'tastemaker leaderboard; --ones-to-watch for the rising slice',
   manifest: 'the dossier data dictionary — every field + provenance per grain',
+  surface: 'generic cluster-keyed producer surfaces — registry index or one surface\'s rows: surface [name] --cluster <hex>',
 };
 
 /** commands with no API operation of their own (the parity map does not govern these) */

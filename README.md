@@ -48,6 +48,7 @@ crate triage            # ONE call: auth state + live API health + copy-paste ne
 | `breakouts` | emerging artists (`--tier`, `--corroboration`) |
 | `tastemakers` | leaderboard; `--ones-to-watch` for the rising slice |
 | `manifest` | the data dictionary — every field + provenance |
+| `surface [name]` | generic cluster-keyed producer surfaces — registry index, or `--cluster <hex>` for one surface's rows |
 | `api <path>` | raw authenticated GET against any `/api/v2` path (escape hatch) |
 | `auth set/status/unset` | key management (config file, `0600`, XDG-honoring) |
 
@@ -55,7 +56,7 @@ crate triage            # ONE call: auth state + live API health + copy-paste ne
 
 Get a key at [crate.hosaka.fm](https://crate.hosaka.fm); docs at
 [crate-sdk.hosaka.fm](https://crate-sdk.hosaka.fm). The CLI is built against API spec
-`2.11.0`, vendored at `contracts/spec.json` (`tests/parity.test.ts` pins this README to the
+`2.12.0`, vendored at `contracts/spec.json` (`tests/parity.test.ts` pins this README to the
 real pin — it cannot silently drift again).
 
 ## Development

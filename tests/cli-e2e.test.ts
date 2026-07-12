@@ -66,7 +66,7 @@ describe('capabilities (the machine contract)', () => {
     expect(Object.keys(c.commands).sort()).toEqual(
       [
         'api', 'artist', 'artists', 'aura', 'auth', 'bandcamp', 'breakouts', 'capabilities', 'docs', 'facets',
-        'festival', 'label', 'manifest', 'master', 'preview', 'resolve', 'robot-docs', 'search', 'tastemakers', 'triage',
+        'festival', 'label', 'manifest', 'master', 'preview', 'resolve', 'robot-docs', 'search', 'surface', 'tastemakers', 'triage',
       ].sort()
     );
   });
@@ -220,6 +220,37 @@ describe('parity commands (API 2.8.0 catch-up) — hermetic dead-port contract',
   });
   it('preview without args → exit 1 usage', () => {
     expect(crate(['preview']).status).toBe(1);
+  });
+});
+
+describe('surface (API 2.12.0 parity) — hermetic dead-port contract', () => {
+  it('index (no name) → attempts the network with a key (exit 6), stdout empty', () => {
+    const r = crate(['surface'], { CRATE_API_KEY: 'ck_x' });
+    expect(r.status).toBe(6);
+    expect(r.stdout).toBe('');
+  });
+  it('index keyless → exit 2 (a keyed endpoint)', () => {
+    expect(crate(['surface']).status).toBe(2);
+  });
+  it('<name> without --cluster → exit 1 usage, stdout empty', () => {
+    const r = crate(['surface', 'seen.radio_play_v1'], { CRATE_API_KEY: 'ck_x' });
+    expect(r.status).toBe(1);
+    expect(r.stdout).toBe('');
+    expect(r.stderr).toContain('--cluster');
+  });
+  it('<name> --cluster not-hex → exit 3 invalid input, even keyless (client-side check first)', () => {
+    const r = crate(['surface', 'seen.radio_play_v1', '--cluster', 'not-a-cluster']);
+    expect(r.status).toBe(3);
+    expect(r.stdout).toBe('');
+  });
+  it('<name> --cluster <hex> → attempts the network (exit 6)', () => {
+    const r = crate(['surface', 'seen.radio_play_v1', '--cluster', 'a'.repeat(64)], { CRATE_API_KEY: 'ck_x' });
+    expect(r.status).toBe(6);
+    expect(r.stdout).toBe('');
+  });
+  it('<name> --cluster <HEX> uppercase is accepted (lowercased) — reaches the network, not exit 3', () => {
+    const r = crate(['surface', 'seen.radio_play_v1', '--cluster', 'A'.repeat(64)], { CRATE_API_KEY: 'ck_x' });
+    expect(r.status).toBe(6);
   });
 });
 
