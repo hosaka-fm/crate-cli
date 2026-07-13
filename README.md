@@ -56,7 +56,7 @@ crate triage            # ONE call: auth state + live API health + copy-paste ne
 
 Get a key at [crate.hosaka.fm](https://crate.hosaka.fm); docs at
 [crate-sdk.hosaka.fm](https://crate-sdk.hosaka.fm). The CLI is built against API spec
-`2.16.0`, vendored at `contracts/spec.json` (`tests/parity.test.ts` pins this README to the
+`2.17.0`, vendored at `contracts/spec.json` (`tests/parity.test.ts` pins this README to the
 real pin — it cannot silently drift again).
 
 ## Development

@@ -8,6 +8,12 @@ All notable changes to `crate-cli` are documented here. The format follows
 > offline from it. `API_VERSION_PIN` tracks the spec's `info.version`; a spec bump that isn't
 > reconciled goes red via `tests/parity.test.ts` + the daily `drift.yml` cron.
 
+## [0.3.5] - 2026-07-14
+
+### Changed
+
+- Reconciled the vendored spec to `/api/v2` **2.17.0** — the artist `rights` facet gains a cluster-anchored `ledger` rights-registration dimension (registeredWorks / worksWithRegisteredIswc / distinctCowriters / cowritersWithMbid + a SoundCloud leg; counts only). Additive on `ArtistDossierContract.rights`; operation set unchanged.
+
 ## [0.3.4] - 2026-07-13
 
 ### Changed
