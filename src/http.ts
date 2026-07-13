@@ -15,7 +15,7 @@ export interface HttpOpts {
   requireKey?: boolean;
 }
 
-export const CLI_VERSION = '0.3.1';
+export const CLI_VERSION = '0.3.2';
 
 interface ApiErrorBody {
   error?: string;
