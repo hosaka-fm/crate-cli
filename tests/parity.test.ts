@@ -74,6 +74,14 @@ describe('version-pin integrity', () => {
     const { CLI_VERSION } = await import('../src/http.js');
     expect(pkg.version).toBe(CLI_VERSION);
   });
+  it('CHANGELOG.md has an entry for the current version (changelog drift guard)', () => {
+    const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')) as { version: string };
+    const changelog = readFileSync(join(ROOT, 'CHANGELOG.md'), 'utf8');
+    expect(
+      changelog.includes(`## [${pkg.version}]`),
+      `CHANGELOG.md is missing a "## [${pkg.version}]" entry — add one before shipping ${pkg.version}`,
+    ).toBe(true);
+  });
 });
 
 describe('generated-types freshness (the crate-sdk drift idiom)', () => {
