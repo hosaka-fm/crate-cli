@@ -8,6 +8,12 @@ All notable changes to `crate-cli` are documented here. The format follows
 > offline from it. `API_VERSION_PIN` tracks the spec's `info.version`; a spec bump that isn't
 > reconciled goes red via `tests/parity.test.ts` + the daily `drift.yml` cron.
 
+## [0.3.3] - 2026-07-13
+
+### Changed
+
+- Reconciled the vendored spec to `/api/v2` **2.15.0** — registry tranche-4 (+spine_artist_name_published_view, +artist_signal_known_since; 33 surfaces). Operation set unchanged.
+
 ## [0.3.2] - 2026-07-13
 
 ### Changed
