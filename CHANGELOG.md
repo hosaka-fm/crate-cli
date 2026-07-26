@@ -8,6 +8,20 @@ All notable changes to `crate-cli` are documented here. The format follows
 > offline from it. `API_VERSION_PIN` tracks the spec's `info.version`; a spec bump that isn't
 > reconciled goes red via `tests/parity.test.ts` + the daily `drift.yml` cron.
 
+## [0.3.7] - 2026-07-26
+
+### Changed
+
+- Reconciled the vendored spec to `/api/v2` **2.34.0** — a catch-up across sixteen spec minors
+  (2.18.0 → 2.34.0). The generated types (`src/generated/crate-api.ts`) now cover **`GET /api/v2/tracks`**
+  (`?fuzzy`, `?source=mb|bandcamp|all` — the new Bandcamp track corpus — + a `sources[]` provenance
+  array), resolve **`?isrc`** / **`?artist&track`** / name-mint fallback, **`GET /api/v2/semantics/dictionary`**,
+  the artist-dossier facets **authorship / lineage / facts+visibility / debut / marketplace**, the aura
+  **`about`** block, and surface registry **35 → 42** (tranches 7–10). `API_VERSION_PIN` → `2.34.0`.
+- The generic `crate api <path>` / `crate artist` / `crate surface` pass-throughs already reached every
+  live endpoint; this brings the vendored spec, types, and capabilities manifest into sync. (First-class
+  `crate tracks` + resolve `--isrc/--artist/--track` flags remain an optional ergonomics follow-up.)
+
 ## [0.3.6] - 2026-07-14
 
 ### Changed

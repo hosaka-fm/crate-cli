@@ -70,4 +70,14 @@ export const WAIVERS: WaiverEntry[] = [
     path: '/api/v2/search-events/refined',
     reason: 'browser-client telemetry beacon, not an agent data surface',
   },
+  {
+    method: 'GET',
+    path: '/api/v2/tracks',
+    reason: 'title-first track search (?fuzzy, ?source=mb|bandcamp|all) — reachable via crate api /api/v2/tracks; a first-class `crate tracks` command is a planned ergonomics follow-up',
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/semantics/dictionary',
+    reason: 'fleet substrate dictionary document — reachable via crate api /api/v2/semantics/dictionary, not a per-entity data surface',
+  },
 ];
