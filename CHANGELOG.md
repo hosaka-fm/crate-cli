@@ -8,6 +8,15 @@ All notable changes to `crate-cli` are documented here. The format follows
 > offline from it. `API_VERSION_PIN` tracks the spec's `info.version`; a spec bump that isn't
 > reconciled goes red via `tests/parity.test.ts` + the daily `drift.yml` cron.
 
+## [0.3.8] - 2026-08-04
+
+### Changed
+
+- Vendored spec reconciled `/api/v2` **2.34.0 → 2.47.0** (thirteen contract versions: track resolver,
+  semantics dictionary JSON, registry rows 43+44, and the dossier's cluster-native facet season incl.
+  `journalism.signals.citedMentions[]`). New paths waived pending the `crate tracks` ergonomics
+  follow-up (all reachable via `crate api`).
+
 ## [0.3.7] - 2026-07-26
 
 ### Changed

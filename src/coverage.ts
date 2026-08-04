@@ -76,6 +76,21 @@ export const WAIVERS: WaiverEntry[] = [
     reason: 'title-first track search (?fuzzy, ?source=mb|bandcamp|all) — reachable via crate api /api/v2/tracks; a first-class `crate tracks` command is a planned ergonomics follow-up',
   },
   {
+    method: 'POST',
+    path: '/api/v2/tracks/resolve',
+    reason: 'batch track resolver (NTS timecode engine shape) — reachable via crate api with a JSON body; first-class command rides the planned `crate tracks` ergonomics follow-up',
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/track',
+    reason: 'single-track resolver twin of tracks/resolve — same waiver rationale',
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/semantics/dictionary.json',
+    reason: 'structured twin of /semantics/dictionary (already waived) — same document, JSON emit; reachable via crate api',
+  },
+  {
     method: 'GET',
     path: '/api/v2/semantics/dictionary',
     reason: 'fleet substrate dictionary document — reachable via crate api /api/v2/semantics/dictionary, not a per-entity data surface',
