@@ -8,6 +8,18 @@ All notable changes to `crate-cli` are documented here. The format follows
 > offline from it. `API_VERSION_PIN` tracks the spec's `info.version`; a spec bump that isn't
 > reconciled goes red via `tests/parity.test.ts` + the daily `drift.yml` cron.
 
+## [0.3.9] - 2026-10-22
+
+### Changed
+
+- Vendored spec reconciled `/api/v2` **2.47.0 → 2.66.0** (nineteen contract versions). The regenerated
+  types carry the 2.65.0 error semantics: `503` is `pool_exhausted` (`Retry-After: 5`) or `query_timeout`
+  (crate's own statement budget, `Retry-After: 30`); `504` is `request_aborted` (the 15 s deadline). Both
+  still exit `5`. Five new operations are waived: `artist/{key}/similar`, `artist/{key}/gigs` and
+  `gigs?city=` (reachable via `crate api`, first-class commands are a planned follow-up), `me/usage`
+  (reachable via `crate api`), and `DELETE me/profiles/{profile_id}` (a partner-side mutation, not
+  reachable from the GET-only `crate api`).
+
 ## [0.3.8] - 2026-08-04
 
 ### Changed

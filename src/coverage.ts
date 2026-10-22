@@ -92,6 +92,31 @@ export const WAIVERS: WaiverEntry[] = [
   },
   {
     method: 'GET',
+    path: '/api/v2/artist/{key}/similar',
+    reason: 'per-artist adjacency evidence (eight axes, movements-not-scores) — reachable via crate api /api/v2/artist/<key>/similar; a first-class `crate similar` command is a planned ergonomics follow-up',
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/artist/{key}/gigs',
+    reason: 'per-artist gig lane — reachable via crate api /api/v2/artist/<key>/gigs; rides the planned `crate gigs` ergonomics follow-up',
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/gigs',
+    reason: 'city gig lane (?city=) — reachable via crate api /api/v2/gigs?city=<city>; rides the planned `crate gigs` ergonomics follow-up',
+  },
+  {
+    method: 'GET',
+    path: '/api/v2/me/usage',
+    reason: 'account usage + credit balance for the calling key — reachable via crate api /api/v2/me/usage; account introspection, not a per-entity data surface',
+  },
+  {
+    method: 'DELETE',
+    path: '/api/v2/me/profiles/{profile_id}',
+    reason: 'partner on-behalf-of profile erasure (a mutation) — NOT reachable from the CLI (crate api is GET-only); partners call it from their own backend or the SDK',
+  },
+  {
+    method: 'GET',
     path: '/api/v2/semantics/dictionary',
     reason: 'fleet substrate dictionary document — reachable via crate api /api/v2/semantics/dictionary, not a per-entity data surface',
   },
